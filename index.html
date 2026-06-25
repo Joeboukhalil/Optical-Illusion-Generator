@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Optical Illusion Generator</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #ffffff;
+            --accent-color: #00adb5;
+            --accent-hover: #00f5ff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+        }
+
+        .container {
+            text-align: center;
+            background: var(--card-color);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 550px;
+            width: 90%;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+        }
+
+        .canvas-container {
+            margin: 20px 0;
+            border: 4px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-generate {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-generate:hover {
+            background-color: var(--accent-hover);
+            box-shadow: 0 0 10px rgba(0, 173, 181, 0.5);
+        }
+
+        .btn-download {
+            background-color: #393e46;
+            color: white;
+            border: 1px solid #4e5561;
+        }
+
+        .btn-download:hover {
+            background-color: #4e5561;
+        }
+
+        .illusion-type {
+            font-style: italic;
+            color: #888;
+            margin-bottom: 10px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Illusion Generator</h1>
+    <div id="illusion-name" class="illusion-type">Click generate to start</div>
+    
+    <div class="canvas-container">
+        <canvas id="illusionCanvas" width="500" height="500"></canvas>
+    </div>
+
+    <div class="controls">
+        <button class="btn-generate" onclick="generateIllusion()">Generate</button>
+        <button class="btn-download" onclick="downloadIllusion()">Download PNG</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('illusionCanvas');
+    const ctx = canvas.getContext('2d');
+    const typeLabel = document.getElementById('illusion-name');
+
+    // Helper: Random number between min and max
+    const randomRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    
+    // Helper: Random high-contrast color pairs
+    function getRandomColors() {
+        const pairs = [
+            ['#000000', '#ffffff'], // Classic Black & White
+            ['#0000ff', '#ffff00'], // Blue & Yellow
+            ['#ff00ff', '#00ff00'], // Magenta & Green
+            ['#ff0000', '#00ffff'], // Red & Cyan
+            ['#000000', '#ff0055']  // Black & Neon Pink
+        ];
+        return pairs[Math.floor(Math.random() * pairs.length)];
+    }
+
+    // --- ILLUSION TYPE 1: The Hermann Grid Variant / Scintillating Grid ---
+    function drawGridIllusion(c1, c2) {
+        typeLabel.innerText = "Type: Scintillating Grid Distortion";
+        ctx.fillStyle = c1;
+        ctx.fillRect(0, 0, 500, 500);
+
+        const size = randomRange(30, 60);
+        const gutter = randomRange(6, 12);
+
+        ctx.fillStyle = c2;
+        for (let x = gutter; x < 500; x += size + gutter) {
+            for (let y = gutter; y < 500; y += size + gutter) {
+                ctx.fillRect(x, y, size, size);
+            }
+        }
+    }
+
+    // --- ILLUSION TYPE 2: Tunnel / Hypnotic Vortex ---
+    function drawTunnelIllusion(c1, c2) {
+        typeLabel.innerText = "Type: Hypnotic Vortex";
+        ctx.fillStyle = c1;
+        ctx.fillRect(0, 0, 500, 500);
+        
+        ctx.save();
+        ctx.translate(250, 250);
+        
+        const steps = randomRange(30, 60);
+        const maxRadius = 360;
+        const angleOffset = Math.random() * 0.5;
+
+        for (let i = steps; i > 0; i--) {
+            ctx.rotate(angleOffset);
+            ctx.fillStyle = (i % 2 === 0) ? c1 : c2;
+            
+            ctx.beginPath();
+            // Randomly choose between a square tunnel or a circular/polygonal tunnel
+            if (steps % 2 === 0) {
+                const r = (maxRadius / steps) * i;
+                ctx.rect(-r/2, -r/2, r, r);
+            } else {
+                ctx.arc(0, 0, (maxRadius / steps) * i, 0, Math.PI * 2);
+            }
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    // --- ILLUSION TYPE 3: Op Art Waves / Moiré Pattern ---
+    function drawWaveIllusion(c1, c2) {
+        typeLabel.innerText = "Type: Op-Art Kinetic Waves";
+        ctx.fillStyle = c1;
+        ctx.fillRect(0, 0, 500, 500);
+
+        ctx.strokeStyle = c2;
+        ctx.lineWidth = randomRange(3, 8);
+        
+        const frequency = Math.random() * 0.04 + 0.01;
+        const amplitude = randomRange(15, 40);
+        const spacing = randomRange(10, 20);
+
+        for (let y = -50; y < 550; y += spacing) {
+            ctx.beginPath();
+            for (let x = 0; x <= 500; x += 5) {
+                let wave = Math.sin(x * frequency) * amplitude;
+                if (y % (spacing * 2) === 0) wave = -wave; // Alternate waves for shifting effect
+                if (x === 0) ctx.moveTo(x, y + wave);
+                else ctx.lineTo(x, y + wave);
+            }
+            ctx.stroke();
+        }
+    }
+
+    // --- ILLUSION TYPE 4: Café Wall / Shifting Lines ---
+    function drawCafeWallIllusion(c1, c2) {
+        typeLabel.innerText = "Type: Café Wall Border Shift";
+        ctx.fillStyle = '#888888'; // Grey mortar lines
+        ctx.fillRect(0, 0, 500, 500);
+
+        const rowHeight = randomRange(25, 40);
+        const boxWidth = rowHeight * 2;
+        let shift = 0;
+        const shiftAmount = boxWidth / randomRange(3, 6);
+
+        for (let y = 0; y < 500; y += rowHeight + 2) { // +2 creates the mortar line
+            // Shift back and forth dynamically
+            shift = (shift + shiftAmount) % boxWidth;
+            
+            for (let x = -boxWidth; x < 500 + boxWidth; x += boxWidth * 2) {
+                ctx.fillStyle = c1;
+                ctx.fillRect(x + shift, y, boxWidth, rowHeight);
+                ctx.fillStyle = c2;
+                ctx.fillRect(x + shift + boxWidth, y, boxWidth, rowHeight);
+            }
+        }
+    }
+
+    // Master function to trigger a random generator
+    function generateIllusion() {
+        const [color1, color2] = getRandomColors();
+        const illusionType = randomRange(1, 4);
+
+        switch(illusionType) {
+            case 1: drawGridIllusion(color1, color2); break;
+            case 2: drawTunnelIllusion(color1, color2); break;
+            case 3: drawWaveIllusion(color1, color2); break;
+            case 4: drawCafeWallIllusion(color1, color2); break;
+        }
+    }
+
+    // Function to handle canvas download
+    function downloadIllusion() {
+        const link = document.createElement('a');
+        link.download = `optical-illusion-${Date.now()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    // Generate one immediately on page load
+    window.onload = generateIllusion;
+</script>
+
+</body>
+</html>
